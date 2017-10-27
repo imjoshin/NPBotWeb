@@ -1,8 +1,39 @@
 @import 'palette';
+@import 'standards';
+
+$breakpoint: 1025px;
 
 body {
 	margin: 0;
-	font-family: -apple-system,system-ui,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+	font-family: OpenSansRegular, sans-serif;
 	overflow: hidden;
-	background: $dark-blue;
+	background-color: $black;
+	color: $white;
+
+	@media (min-width: $breakpoint)  {
+		background-image: url('../img/background.jpg');
+		background-position: center top;
+		background-repeat: no-repeat;
+	}
+}
+
+#header {
+	background-image: url('../img/title.png');
+	background-position: center top;
+	background-repeat: no-repeat;
+	background-size: contain;
+	height: 82px;
+	margin: 8px 0;
+}
+
+#wrapper {
+	background-color: $dark-blue;
+	margin: 0 auto;
+	width: 475px;
+	height: 500px;
+	text-align: center;
+
+	&.wrapper-login {
+		background-color: $black;
+	}
 }

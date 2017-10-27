@@ -1,0 +1,73 @@
+h1 {
+	background-color: $blue;
+	color: $white;
+	width: 100%;
+	font-size: 28px;
+	font-weight: normal;
+	text-align: center;
+	padding: 4px 0;
+	margin: 0;
+}
+
+form {
+	width: 100%;
+	padding: 30px 90px;
+
+	.field {
+		margin-bottom: 10px;
+		font-size: 16px;
+
+		span {
+			display: block;
+		}
+
+		input {
+			width: 100%;
+		}
+	}
+}
+
+.btn {
+	display: inline-block;
+	border-radius: 4px;
+    font-size: 14px;
+    overflow: hidden;
+	width: fit-content;
+	padding: 8px 30px;
+
+	&-red {
+		background-color: $red;
+	}
+
+	&-block {
+		display: block;
+	}
+
+	&-center {
+		margin: 0 auto;
+	}
+
+	&:hover {
+		cursor: pointer;
+	}
+}
+
+
+input[type='text'],
+input[type='password'] {
+	resize: none;
+	text-align: center;
+	background-color: $black;
+	color: $white;
+	border: 2px solid $light-blue;
+	font-size: 16px;
+	border-radius: 3px;
+	-webkit-appearance: none;
+	-moz-appearance: none;
+	padding: 4px;
+	line-height: 150%;
+	-ms-user-select: text;
+	-moz-user-select: text;
+	-webkit-user-select: text;
+	user-select: text;
+}

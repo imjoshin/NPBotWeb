@@ -14,4 +14,5 @@
 </head>
 
 <body>
-<div id="wrapper">
+<div id="header"></div>
+<div id="wrapper" <?php echo isset($_SESSION['username']) ? "" : "class='wrapper-login'"; ?>>
