@@ -6,7 +6,7 @@
 	{
 		// extract(init());
 		?>
-
+		<div class="btn btn-logout">Logout</div>
 		<?php
 	}
 	else

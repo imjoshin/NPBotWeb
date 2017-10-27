@@ -34,6 +34,7 @@ form {
     overflow: hidden;
 	width: fit-content;
 	padding: 8px 30px;
+	background-color: $light-blue;
 
 	&-red {
 		background-color: $red;
@@ -49,6 +50,15 @@ form {
 
 	&:hover {
 		cursor: pointer;
+	}
+}
+
+.disabled {
+	opacity: .7;
+	transition: opacity .1s;
+
+	&:hover {
+		cursor: default;
 	}
 }
 

@@ -1,0 +1,3 @@
+[submodule "php/triton"]
+	path = php/triton
+	url = https://github.com/wrenoud/phpTriton
