@@ -1,0 +1,6 @@
+dist/js/app.js
+dist/css/app.css
+dist/css/app.css.map
+.sass-cache
+node_modules
+php/auth.php

@@ -1,0 +1,10 @@
+{
+	"name": "a2pogo",
+	"version": "0.1.0",
+	"devDependencies": {
+		"grunt": "~0.4.4",
+		"grunt-contrib-uglify": "latest",
+		"grunt-contrib-sass": "latest",
+		"grunt-contrib-watch": "latest"
+	}
+}
