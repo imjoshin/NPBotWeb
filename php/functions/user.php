@@ -17,18 +17,25 @@ class User
 		$user = dbQuery("SELECT id, username, password, ltime FROM user WHERE username = ?", array($username));
 		$new_user = count($user) === 0;
 
+		// create triton client, don't auth yet
+		$client = new TritonClient($username, $password);
+
 		// user has logged in before and the passwords match and we want to load from cache
-		if (!$new_user && $password === $user[0]['password'] && loadFromCache($user[0]['id']))
+		// or we're already logged in
+		if (
+			(!$new_user && $password === $user[0]['password'] && loadFromCache($user[0]['id'])) ||
+			$client->logged_in
+		)
 		{
 			session_start();
 			$_SESSION['id'] = $user[0]['id'];
 			$_SESSION['username'] = $username;
+			$_SESSION['cookie'] = $user[0]['cookie'];
 
 			return array('success'=>true);
 		}
 
-		// verify with triton if new user or new password
-		$client = new TritonClient($username, $password);
+		// authenticate with triton
 		ob_start();
 		$auth = $client->authenticate();
 		ob_clean();
@@ -43,7 +50,7 @@ class User
 		if ($new_user)
 		{
 			// create new user
-			$result = dbQuery("INSERT INTO user(username, password, utime, ltime) VALUES (?, ?, NOW(), NOW())", array($username, $password));
+			$result = dbQuery("INSERT INTO user(username, password, utime, ltime, cookie) VALUES (?, ?, NOW(), NOW(), ?)", array($username, $password, $client->auth_cookie));
 			if ($result === false)
 			{
 				// TODO detect error correctly
@@ -59,7 +66,7 @@ class User
 			if ($password === $user[0]['password'])
 			{
 				// only update ltime
-				$result = dbQuery("UPDATE user SET ltime = NOW() WHERE id = ?", array($user[0]['id']));
+				$result = dbQuery("UPDATE user SET ltime = NOW(), cookie = ? WHERE id = ?", array($client->auth_cookie, $user[0]['id']));
 				if ($result === false)
 				{
 					// TODO detect error correctly
@@ -71,7 +78,7 @@ class User
 			else
 			{
 				// update password and utime since a new password was given
-				$result = dbQuery("UPDATE user SET password = ?, utime = NOW(), ltime = NOW() WHERE id = ?", array($password, $user[0]['id']));
+				$result = dbQuery("UPDATE user SET password = ?, utime = NOW(), ltime = NOW(), cookie = ? WHERE id = ?", array($password, $client->auth_cookie, $user[0]['id']));
 				if ($result === false)
 				{
 					// TODO detect error correctly
@@ -86,6 +93,7 @@ class User
 
 		$_SESSION['id'] = $user[0]['id'];
 		$_SESSION['username'] = $username;
+		$_SESSION['cookie'] = $client->auth_cookie;
 
 		return array('success'=>true);
 	}

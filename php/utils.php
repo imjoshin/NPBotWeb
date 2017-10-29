@@ -22,7 +22,8 @@ function loadFromCache($user_id)
 
 	// add up minutes since last login
 	$minutes = ($diff->format('%a') * 1440) + ($diff->format('%h') * 60) + $diff->format('%i');
-	return $minutes < CACHE_TIMEOUT;
+	error_log("Logged in $minutes minutes ago");
+	return $minutes < AUTH_EXPIRE;
 }
 
 function unserializeForm($array)
