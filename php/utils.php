@@ -6,7 +6,26 @@ function init()
 	return array();
 }
 
-function unserialize_form($array)
+function loadFromCache($user_id)
+{
+	$user = dbQuery("SELECT ltime FROM user WHERE id = ?", array($user_id));
+
+	if (count($user) == 0)
+	{
+		return false;
+	}
+
+	// get last login difference
+	$now = new DateTime();
+	$last_login = new DateTime($user[0]['ltime']);
+	$diff = $now->diff($last_login);
+
+	// add up minutes since last login
+	$minutes = ($diff->format('%a') * 1440) + ($diff->format('%h') * 60) + $diff->format('%i');
+	return $minutes < CACHE_TIMEOUT;
+}
+
+function unserializeForm($array)
 {
 	$data = array();
 	foreach(explode('&', $array) as $value)
@@ -38,7 +57,7 @@ function unserialize_form($array)
 /*
  * Returns a database connection
  */
-function db_connect()
+function dbConnect()
 {
 	$result = new mysqli(DBHOST, DBUSER, DBPASS, DBNAME);
 
@@ -57,9 +76,9 @@ function db_connect()
  * @param array  $params An array of parameters to bind
  * @return array Matching rows in an array
  */
-function db_query($query, $params = null)
+function dbQuery($query, $params = null)
 {
-	$mysqli = db_connect();
+	$mysqli = dbConnect();
 	$stmt = $mysqli->prepare($query);
 
 	if ($params)

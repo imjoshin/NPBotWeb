@@ -21,7 +21,7 @@ if (!isset($_SESSION['id']) && !in_array(strtolower($_POST['call']), array("logi
 // look for serialized form
 if (isset($_POST['form']))
 {
-	$_POST = array_merge($_POST, unserialize_form($_POST['form']));
+	$_POST = array_merge($_POST, unserializeForm($_POST['form']));
 	unset($_POST['form']);
 }
 
