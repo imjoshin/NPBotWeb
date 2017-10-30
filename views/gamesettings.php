@@ -20,10 +20,14 @@
 	</div>
 	<div class="field">
 		<span class='block'>Webhook Image</span>
-		<input id='webhook-name' name='webhook_name' type='text' maxlength="512" value="http://joshjohnson.io/images/np.png">
+		<input id='webhook-image' name='webhook_image' type='text' maxlength="512" value="http://joshjohnson.io/images/np.png">
 	</div>
 	<div class="category">
 		<span>Notifications</span>
+	</div>
+	<div class="field">
+		<span class='block'>Turn Start Format</span>
+		<input id='leaderboard-text-format' name='leaderboard_text_format' type='text' value="Turn *%TURN%* just started! Here is the leaderboard:" maxlength="512">
 	</div>
 	<div class="field">
 		<span>Turn Leaderboard</span>
@@ -38,12 +42,19 @@
 		<input id='print-turns-taken' name='print_turns_taken' type='checkbox'>
 	</div>
 	<div class="field">
-		<span>N Last Players</span>
+		<span>N Last Players Warning</span>
 		<input id='print-n-last-players' name='print_n_last_players' type='number' value="1" min="0" max="32">
 	</div>
 	<div class="field">
 		<span>Turn End Warning (hrs)</span>
-		<input id='print-warning' name='print_warning' type='number' value="0" min="0" max="23">
+		<input id='print-warning' name='print_warning' type='number' value="1" min="0" max="23">
 	</div>
+	<div class="category">
+		<span>Nicknames</span>
+	</div>
+	<div class="field">
+		<span id='no-players-yet'>Players have not been added yet. Please hold tight and wait for the first game scan to complete!</span>
+	</div>
+	<input type='hidden' name='game_id'></input>
 	<div class="btn btn-red btn-block btn-center">Save</div>
 </form>

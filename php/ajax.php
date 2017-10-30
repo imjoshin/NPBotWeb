@@ -34,6 +34,9 @@ switch(strtolower($_POST['call']))
 	case 'logout':
 		$ret = User::logout();
 		break;
+	case 'save_settings':
+		$ret = Game::saveSettings($_POST);
+		break;
 }
 
 echo json_encode($ret);

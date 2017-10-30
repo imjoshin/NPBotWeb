@@ -3,7 +3,7 @@
 foreach ($game_list as $game)
 {
 	?>
-		<div class='btn btn-block btn-game' data-fields="<?php echo json_encode($game['fields']); ?>">
+		<div class='btn btn-block btn-game' <?php echo isset($game['fields']) ? "data-fields='" . json_encode($game['fields']) . "'" : ''; ?>>
 			<?php echo $game['name']; ?>
 		</div>
 	<?php

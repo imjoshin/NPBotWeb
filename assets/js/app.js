@@ -27,10 +27,66 @@ $().ready(function() {
 	$('.btn-home').on('click', function() {
 		$('.view').hide();
 		$('#home').show();
+
+		$("#settings").trigger('reset');
+		$('#leaderboard-field').show();
+		$(this).attr('data-type', 'discord');
+		$('#slack-channel').hide();
 	});
 
 	$('.btn-game').on('click', function() {
+		if ($(this).attr('data-fields') == null) {
+			alert("Notifications have already been set up for this game and cannot be managed by two players.");
+			return;
+		}
+
 		$('.view').hide();
+		$("#settings-name").text($(this).html());
+
+		// Set fields on form
+		var fields = $.parseJSON($(this).attr('data-fields'));
+		$.each(fields, function(input, value) {
+			input = input.replace('[', '\\[').replace(']', '\\]');
+			if ($('[name = ' + input + ']').attr("type") == "checkbox") {
+				$('[name = ' + input + ']').prop('checked', value == 1);
+			} else {
+				$('[name = ' + input + ']').val(value);
+			}
+		});
+
+		// TODO fix hide/show settings like leaderboard and channel id
+
 		$('#gamesettings').show();
 	});
+
+	$(document).on('click', '#settings .btn:not(.disabled)', function() {
+		var btn = $(this);
+		btn.addClass('disabled');
+
+		$.ajax({
+			type: "POST",
+			dataType: "json",
+			url: "php/ajax.php",
+			data: {
+				call: 'save_settings',
+				form: $('#settings').serialize()
+			},
+			success: function(data) {
+				if (data.success) {
+					$.each($('.btn-game'), function(k, v) {
+						if ($(this).attr('data-fields').indexOf(data.output['game_id']) >= 0) {
+							$(this).attr('data-fields', JSON.stringify(data.output));
+						}
+					});
+
+					$('.btn-home').trigger('click');
+				} else {
+					alert(data.output['message']);
+				}
+			},
+			complete: function() {
+				btn.removeClass('disabled');
+			}
+		});
+	})
 });
