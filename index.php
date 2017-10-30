@@ -8,9 +8,11 @@
 		extract(init());
 		?>
 
-		<div id="gamelist" class="view">
-			<?php include 'views/gamelist.php'; ?>
-			<div class="btn btn-logout">Logout</div>
+		<div id="home" class="view">
+			<div id="gamelist">
+				<?php include 'views/gamelist.php'; ?>
+			</div>
+			<div class="btn btn-red btn-logout">Logout</div>
 		</div>
 
 		<div id="gamesettings" class="view">

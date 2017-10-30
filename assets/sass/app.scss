@@ -8,6 +8,7 @@ body {
 	font-family: OpenSansRegular, sans-serif;
 	background-color: $black;
 	color: $white;
+	overflow-y: scroll;
 
 	@media (min-width: $breakpoint)  {
 		background-image: url('../img/background.jpg');
@@ -38,13 +39,16 @@ body {
 		background-color: $black;
 	}
 
-	#gamelist {
+	#home {
 		display: block;
 	}
-	
+
 	.view {
 		position: relative;
 		display: none;
 	}
+}
 
+#gamelist {
+	margin-bottom: 30px;
 }
