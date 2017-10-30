@@ -138,4 +138,110 @@ class Game
 		unset($settings[0]['owner_user_id']);
 		return array('success'=>true, 'output'=>$settings[0]);
 	}
+
+	// response is different here because its used as a public endpoint
+	public static function getGameInfo($game_id)
+	{
+		ob_start();
+		$settings = dbQuery("SELECT * FROM notification_settings WHERE game_id = ?", array($game_id));
+		if (count($settings) == 0)
+		{
+			return array("error" => "Game ID has not been set up.");
+		}
+
+		$client = User::getGameClient($settings[0]['owner_user_id']);
+
+		$game = $client->GetGame($game_id);
+		if (!$game)
+		{
+			return array("error" => "Failed to fetch game data.");
+		}
+
+		$universe = $game->getFullUniverse();
+		if (!$universe)
+		{
+			return array("error" => "Failed to fetch universe data.");
+		}
+
+		// logic for player data from https://github.com/BrandonDusseau/np2-wallboard/blob/master/game.php
+		// Modify player information to remove private data and add attributes
+		if (!empty($universe['players']))
+		{
+			// Define colors for the players. These eight colors are repeated with each set of eight players.
+			$player_colors = [
+				"#0000FF",
+				"#009FDF",
+				"#40C000",
+				"#FFC000",
+				"#DF5F00",
+				"#C00000",
+				"#C000C0",
+				"#6000C0",
+			];
+
+			$players_rekeyed = [];
+
+			// This array is used to determine ranking
+			$rank = [];
+
+			foreach ($universe['players'] as &$player)
+			{
+				// Strip private information
+				$player_strip = ['researching', 'researching_next', 'war', 'countdown_to_war', 'cash', 'stars_abandoned'];
+				$player = array_diff_key($player, array_flip($player_strip));
+
+				// Rename 'alias' to 'name' for consistency.
+				$player['name'] = $player['alias'];
+				unset($player['alias']);
+
+				foreach ($player['tech'] as &$tech)
+				{
+					$tech_strip = ['sv', 'research', 'bv', 'brr'];
+					$tech = array_diff_key($tech, array_flip($tech_strip));
+				}
+
+				// Add player color and shape
+				$player['color'] = $player_colors[$player['uid'] % 8];
+				$player['shape'] = $player['uid'] % 8;
+				$players_rekeyed[$player['uid']] = $player;
+				$rank[] = ['player' => $player['uid'], 'stars' => $player['total_stars'], 'ships' => $player['total_strength']];
+			}
+
+			// Rank the players by stars, ships, then UID.
+			usort(
+				$rank,
+				function ($a, $b)
+				{
+					// B ranks higher if A has fewer stars, or if A has fewer ships and stars are equal
+					if ($a['stars'] < $b['stars'] || ($a['stars'] == $b['stars'] && $a['ships'] < $b['ships']))
+					{
+						return 1;
+					}
+					// A ranks higher if B has fewer stars, or if B has fewer ships and stars are equal
+					elseif ($a['stars'] > $b['stars'] || ($a['stars'] == $b['stars'] && $a['ships'] > $b['ships']))
+					{
+						return -1;
+					}
+					// Otherwise, everything is equal and we should just sort by UID
+					else
+					{
+						return ($a['player'] - $b['player']);
+					}
+				}
+			);
+
+			// Add the ranks back into the player data
+			// Add 1 to the index to make rankings start at 1.
+			foreach ($rank as $index => $player_rank)
+			{
+				$players_rekeyed[$player_rank['player']]['rank'] = $index + 1;
+			}
+
+			$universe['players'] = $players_rekeyed;
+		}
+
+		unset($universe['stars']);
+		unset($universe['fleets']);
+		return $universe;
+	}
 }

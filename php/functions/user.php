@@ -4,10 +4,15 @@ require_once(BASE_PATH . "triton/client.php");
 
 class User
 {
-	public static function getGameClient()
+	public static function getGameClient($user_id = null)
 	{
+		if ($user_id == null)
+		{
+			$user_id = $_SESSION['id'];
+		}
+
 		ob_start();
-		$user = dbQuery("SELECT * FROM user WHERE id = ?", array($_SESSION['id']));
+		$user = dbQuery("SELECT * FROM user WHERE id = ?", array($user_id));
 		$client = new TritonClient($user[0]['username'], $user[0]['password']);
 
 		if ($client->logged_in)
@@ -15,7 +20,7 @@ class User
 			return $client;
 		}
 
-		if (loadFromCache($_SESSION['id']))
+		if (loadFromCache($user_id))
 		{
 			$client->auth_cookie = $user[0]['cookie'];
 			$client->logged_in = true;
@@ -28,7 +33,7 @@ class User
 
 		if ($auth)
 		{
-			$result = dbQuery("UPDATE user SET ltime = NOW(), cookie = ? WHERE id = ?", array($client->auth_cookie, $_SESSION['id']));
+			$result = dbQuery("UPDATE user SET ltime = NOW(), cookie = ? WHERE id = ?", array($client->auth_cookie, $user_id));
 			if ($result === false)
 			{
 				// TODO detect error correctly
