@@ -6,10 +6,17 @@
 	if (isset($_SESSION['username']))
 	{
 		extract(init());
-		include 'views/gamelist.php';
 		?>
 
-		<div class="btn btn-logout">Logout</div>
+		<div id="gamelist" class="view">
+			<?php include 'views/gamelist.php'; ?>
+			<div class="btn btn-logout">Logout</div>
+		</div>
+
+		<div id="gamesettings" class="view">
+			<?php include 'views/gamesettings.php'; ?>
+		</div>
+
 		<?php
 	}
 	else

@@ -6,12 +6,12 @@ $breakpoint: 1025px;
 body {
 	margin: 0;
 	font-family: OpenSansRegular, sans-serif;
-	overflow: hidden;
 	background-color: $black;
 	color: $white;
 
 	@media (min-width: $breakpoint)  {
 		background-image: url('../img/background.jpg');
+		background-attachment: fixed;
 		background-position: center top;
 		background-repeat: no-repeat;
 	}
@@ -30,11 +30,21 @@ body {
 	background-color: $dark-blue;
 	margin: 0 auto;
 	width: 475px;
-	height: 500px;
+	min-height: 300px;
 	text-align: center;
-	padding-top: 30px;
+	padding-bottom: 20px;
 
 	&.wrapper-login {
 		background-color: $black;
 	}
+
+	#gamelist {
+		display: block;
+	}
+	
+	.view {
+		position: relative;
+		display: none;
+	}
+
 }

@@ -7,22 +7,44 @@ h1 {
 	text-align: center;
 	padding: 4px 0;
 	margin: 0;
+	margin-bottom: 20px;
 }
 
 form {
 	width: 100%;
-	padding: 30px 90px;
+
+	.category {
+		margin: 20px;
+
+		span {
+			font-size: 24px;
+		}
+	}
 
 	.field {
 		margin-bottom: 10px;
 		font-size: 16px;
+		padding: 5px 90px;
 
 		span {
-			display: block;
+			&.block {
+				display: block;
+			}
 		}
 
-		input {
+		input[type="text"],
+		input[type="password"] {
 			width: 100%;
+		}
+
+		input[type="checkbox"] {
+			margin-left: 10px;
+		}
+
+		input[type="number"] {
+			margin-left: 10px;
+			max-width: 50px;
+			text-align: center;
 		}
 	}
 }
@@ -48,6 +70,14 @@ form {
 
 	&-center {
 		margin: 0 auto;
+	}
+
+	&-home {
+		padding: 8px 12px;
+    	font-size: 24;
+	    position: absolute;
+	    top: 63px;
+	    left: 11px;
 	}
 
 	&:hover {

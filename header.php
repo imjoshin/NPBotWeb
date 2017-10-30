@@ -3,7 +3,7 @@
 
 <html>
 <head>
-  <title>NP Slackbot</title>
+  <title>NP Webhook</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0">
   <link rel="icon" href="dist/img/icon.png">
   <link href="dist/css/font-awesome.min.css" rel="stylesheet" />

@@ -1,5 +1,5 @@
+<h1>Gamelist</h1>
 <?php
-
 foreach ($game_list as $game)
 {
 	?>
@@ -8,5 +8,4 @@ foreach ($game_list as $game)
 		</div>
 	<?php
 }
-
 ?>
