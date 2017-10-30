@@ -1,7 +1,8 @@
 <?php
-require 'utils.php';
-require 'constants.php';
-require 'functions/user.php';
+
+require_once('constants.php');
+require_once(BASE_PATH . 'utils.php');
+require_once(BASE_PATH . 'functions/user.php');
 
 if (!isset($_POST['call']))
 {

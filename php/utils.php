@@ -1,9 +1,10 @@
 <?php
-require 'auth.php';
+require_once(BASE_PATH . 'auth.php');
+require_once(BASE_PATH . 'functions/game.php');
 
 function init()
 {
-	return array();
+	return array("game_list" => Game::getGameList());
 }
 
 function loadFromCache($user_id)
@@ -22,7 +23,6 @@ function loadFromCache($user_id)
 
 	// add up minutes since last login
 	$minutes = ($diff->format('%a') * 1440) + ($diff->format('%h') * 60) + $diff->format('%i');
-	error_log("Logged in $minutes minutes ago");
 	return $minutes < AUTH_EXPIRE;
 }
 

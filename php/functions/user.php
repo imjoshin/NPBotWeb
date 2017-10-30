@@ -1,11 +1,49 @@
 <?php
 
-require "triton/client.php";
+require_once(BASE_PATH . "triton/client.php");
 
 class User
 {
+	public static function getGameClient()
+	{
+		ob_start();
+		$user = dbQuery("SELECT * FROM user WHERE id = ?", array($_SESSION['id']));
+		$client = new TritonClient($user[0]['username'], $user[0]['password']);
+
+		if ($client->logged_in)
+		{
+			return $client;
+		}
+
+		if (loadFromCache($_SESSION['id']))
+		{
+			$client->auth_cookie = $user[0]['cookie'];
+			$client->logged_in = true;
+			return $client;
+		}
+
+		// authenticate with triton
+		$auth = $client->authenticate();
+		ob_end_clean();
+
+		if ($auth)
+		{
+			$result = dbQuery("UPDATE user SET ltime = NOW(), cookie = ? WHERE id = ?", array($client->auth_cookie, $_SESSION['id']));
+			if ($result === false)
+			{
+				// TODO detect error correctly
+				// return array('success'=>false, 'output'=>array(
+				//  	"message"=>"Failed to create user."
+				// ));
+			}
+		}
+
+		return null;
+	}
+
 	public static function login($username, $password)
 	{
+		ob_start();
 		$username = strtolower($username);
 		if (isset($_SESSION['id']))
 		{
@@ -30,15 +68,13 @@ class User
 			session_start();
 			$_SESSION['id'] = $user[0]['id'];
 			$_SESSION['username'] = $username;
-			$_SESSION['cookie'] = $user[0]['cookie'];
 
 			return array('success'=>true);
 		}
 
 		// authenticate with triton
-		ob_start();
 		$auth = $client->authenticate();
-		ob_clean();
+		ob_end_clean();
 
 		if (!$auth)
 		{
@@ -93,7 +129,6 @@ class User
 
 		$_SESSION['id'] = $user[0]['id'];
 		$_SESSION['username'] = $username;
-		$_SESSION['cookie'] = $client->auth_cookie;
 
 		return array('success'=>true);
 	}

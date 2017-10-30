@@ -1,4 +1,6 @@
 <?php session_start(); ?>
+<?php require_once("php/constants.php"); ?>
+
 <html>
 <head>
   <title>NP Slackbot</title>
