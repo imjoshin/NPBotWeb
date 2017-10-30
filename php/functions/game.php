@@ -35,7 +35,8 @@ class Game
 
 			$new_game = array("name" => $game['name']);
 
-			if ($game_config[0]['owner_user_id'] == $_SESSION['id'])
+			// if no settings have been made or they were made by the logged in user, allow editing
+			if (count($game_config) == 0 || $game_config[0]['owner_user_id'] == $_SESSION['id'])
 			{
 				unset($game_config[0]['owner_user_id']);
 				$new_game['fields'] = count($game_config) ? $game_config[0] : array('game_id' => $game['number']);
