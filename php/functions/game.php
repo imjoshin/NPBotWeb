@@ -242,6 +242,7 @@ class Game
 
 		unset($universe['stars']);
 		unset($universe['fleets']);
+		unset($universe['now']);
 		return $universe;
 	}
 }

@@ -1,20 +1,19 @@
 @import 'palette';
 @import 'standards';
 
-$breakpoint: 1025px;
-
 body {
 	margin: 0;
 	font-family: OpenSansRegular, sans-serif;
 	background-color: $black;
 	color: $white;
 	overflow-y: scroll;
+	background-image: url('../img/background.jpg');
+	background-attachment: fixed;
+	background-position: center top;
+	background-repeat: no-repeat;
 
-	@media (min-width: $breakpoint)  {
-		background-image: url('../img/background.jpg');
-		background-attachment: fixed;
-		background-position: center top;
-		background-repeat: no-repeat;
+	@media (max-width: $breakpoint)  {
+		background: $black;
 	}
 }
 
@@ -34,6 +33,10 @@ body {
 	min-height: 300px;
 	text-align: center;
 	padding-bottom: 20px;
+
+	@media (max-width: $breakpoint)  {
+		width: 100%;
+	}
 
 	&.wrapper-login {
 		background-color: $black;
