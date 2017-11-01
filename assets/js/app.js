@@ -36,7 +36,7 @@ $().ready(function() {
 
 	$('.btn-game').on('click', function() {
 		if ($(this).attr('data-fields') == null) {
-			alert("Notifications have already been set up for this game and cannot be managed by two players.");
+			alert("You are not the admin of this game.\nPlease contact the admin to set up notifications.");
 			return;
 		}
 
@@ -74,7 +74,8 @@ $().ready(function() {
 			success: function(data) {
 				if (data.success) {
 					$.each($('.btn-game'), function(k, v) {
-						if ($(this).attr('data-fields').indexOf(data.output['game_id']) >= 0) {
+						// find game button
+						if ($(this).attr('data-fields') && $(this).attr('data-fields').indexOf(data.output['game_id']) >= 0) {
 							$(this).attr('data-fields', JSON.stringify(data.output));
 						}
 					});

@@ -32,14 +32,13 @@ class Game
 		foreach ($games as $game)
 		{
 			$game_config = dbQuery("SELECT * FROM notification_settings WHERE game_id = ?", array($game['number']));
-
 			$new_game = array("name" => $game['name']);
 
-			// if no settings have been made or they were made by the logged in user, allow editing
-			if (count($game_config) == 0 || $game_config[0]['owner_user_id'] == $_SESSION['id'])
+			// if current user is owner of game or admin
+			if ($game['config']['adminUserId'] == $_SESSION['player_id'] || $_SESSION['admin'])
 			{
-				unset($game_config[0]['owner_user_id']);
 				$new_game['fields'] = count($game_config) ? $game_config[0] : array('game_id' => $game['number']);
+				unset($new_game['fields']['player_id']);
 			}
 
 			$ret[] = $new_game;
@@ -50,11 +49,11 @@ class Game
 
 	public static function saveSettings($form)
 	{
-		//error_log(json_encode($form));
 		$settings = dbQuery("SELECT * FROM notification_settings WHERE game_id = ?", array($form['game_id']));
 		$new_settings = count($settings) === 0;
 
-		if (!$new_settings && $settings[0]['owner_user_id'] != $_SESSION['id'])
+		// check if player has access to modify this
+		if (!$new_settings && $settings[0]['player_id'] != $_SESSION['player_id'] && !$_SESSION['admin'])
 		{
 			return array('success'=>false, 'output'=>array(
 				"message"=>"You do not have permissions to change these settings."
@@ -68,21 +67,21 @@ class Game
 			));
 		}
 
-		if (strpos($form['webhook_url'], 'hooks.slack.com/services') !== false && (!isset($form['webhook_channel']) || strlen($form['webhook_channel']) < 7))
+		if (strpos($form['webhook_url'], 'hooks.slack.com/services') !== false && (!isset($form['webhook_channel']) || strlen(trim($form['webhook_channel'])) < 7))
 		{
 			return array('success'=>false, 'output'=>array(
 				"message"=>"Invalid webhook channel ID."
 			));
 		}
 
-		if (!isset($form['webhook_name']) || strlen($form['webhook_name']) < 1)
+		if (!isset($form['webhook_name']) || strlen(trim($form['webhook_name'])) < 1)
 		{
 			return array('success'=>false, 'output'=>array(
 				"message"=>"Invalid webhook name."
 			));
 		}
 
-		if (!isset($form['webhook_image']) || strlen($form['webhook_image']) < 1)
+		if (!isset($form['webhook_image']) || strlen(trim($form['webhook_image'])) < 1)
 		{
 			return array('success'=>false, 'output'=>array(
 				"message"=>"Invalid webhook image."
@@ -91,23 +90,23 @@ class Game
 
 		if ($new_settings)
 		{
-			$fields = "game_id, owner_user_id, print_leaderboard, print_turns_taken, print_n_last_players, print_warning, " .
+			$fields = "game_id, player_id, print_leaderboard, print_turns_taken, print_n_last_players, print_warning, " .
 					  "leaderboard_format, leaderboard_text_format, webhook_name, webhook_url, webhook_image, webhook_channel";
 			$result = dbQuery(
 				"INSERT INTO notification_settings($fields) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				array(
 					$form['game_id'],
-					$_SESSION['id'],
+					$_SESSION['player_id'],
 					isset($form['print_leaderboard']) && $form['print_leaderboard'] == 'on',
 					isset($form['print_turns_taken']) && $form['print_turns_taken'] == 'on',
 					$form['print_n_last_players'],
 					$form['print_warning'],
-					$form['leaderboard_format'],
-					$form['leaderboard_text_format'],
-					$form['webhook_name'],
-					$form['webhook_url'],
-					$form['webhook_image'],
-					$form['webhook_channel']
+					trim($form['leaderboard_format']),
+					trim($form['leaderboard_text_format']),
+					trim($form['webhook_name']),
+					trim($form['webhook_url']),
+					trim($form['webhook_image']),
+					trim($form['webhook_channel'])
 				)
 			);
 		}
@@ -131,11 +130,24 @@ class Game
 					$form['game_id'],
 				)
 			);
+
+			if (!$_SESSION['admin'])
+			{
+				// update player_id in case someone that is not the admin set this up
+				// also this is super hacky
+				dbQuery(
+					"UPDATE notification_settings SET player_id = ? WHERE game_id = ?",
+					array(
+						$_SESSION['player_id'],
+						$form['game_id']
+					)
+				);
+			}
 		}
 
 		$settings = dbQuery("SELECT * FROM notification_settings WHERE game_id = ?", array($form['game_id']));
 
-		unset($settings[0]['owner_user_id']);
+		unset($settings[0]['player_id']);
 		return array('success'=>true, 'output'=>$settings[0]);
 	}
 
@@ -162,6 +174,8 @@ class Game
 		{
 			return array("error" => "Failed to fetch game data.");
 		}
+
+		return $player;
 
 		$game = $client->GetGame($game_id);
 		if (!$game)

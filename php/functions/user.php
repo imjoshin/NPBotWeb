@@ -57,7 +57,7 @@ class User
 			));
 		}
 
-		$user = dbQuery("SELECT id, username, password, ltime FROM user WHERE username = ?", array($username));
+		$user = dbQuery("SELECT id, username, password, player_id, admin, ltime FROM user WHERE username = ?", array($username));
 		$new_user = count($user) === 0;
 
 		// create triton client, don't auth yet
@@ -73,6 +73,8 @@ class User
 			session_start();
 			$_SESSION['id'] = $user[0]['id'];
 			$_SESSION['username'] = $username;
+			$_SESSION['admin'] = $user[0]['admin'];
+			$_SESSION['player_id'] = $user[0]['player_id'];
 
 			return array('success'=>true);
 		}
@@ -90,8 +92,24 @@ class User
 
 		if ($new_user)
 		{
+			$server = $client->GetServer();
+			if (!$server)
+			{
+				return array('success'=>false, 'output'=>array(
+				 	"message"=>"Failed to fetch from Triton's server."
+				));
+			}
+
+			$player = $server->GetPlayer();
+			if (!$player)
+			{
+				return array('success'=>false, 'output'=>array(
+				 	"message"=>"Failed to fetch from Triton's server."
+				));
+			}
+
 			// create new user
-			$result = dbQuery("INSERT INTO user(username, password, utime, ltime, cookie) VALUES (?, ?, NOW(), NOW(), ?)", array($username, $password, $client->auth_cookie));
+			$result = dbQuery("INSERT INTO user(username, password, player_id, utime, ltime, cookie) VALUES (?, ?, ?, NOW(), NOW(), ?)", array($username, $password, $player['user_id'], $client->auth_cookie));
 			if ($result === false)
 			{
 				// TODO detect error correctly
@@ -100,7 +118,7 @@ class User
 				// ));
 			}
 
-			$user = dbQuery("SELECT id FROM user WHERE username = ?", array($username));
+			$user = dbQuery("SELECT id, username, player_id, admin FROM user WHERE username = ?", array($username));
 		}
 		else
 		{
@@ -134,6 +152,8 @@ class User
 
 		$_SESSION['id'] = $user[0]['id'];
 		$_SESSION['username'] = $username;
+		$_SESSION['admin'] = $user[0]['admin'];
+		$_SESSION['player_id'] = $user[0]['player_id'];
 
 		return array('success'=>true);
 	}
