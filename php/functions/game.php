@@ -283,68 +283,77 @@ class Game
 
 		self::renameArrayKey($universe, 'fleets', 'carriers');
 
-		// TODO detect if this is a dark game. If so, hide carriers and stars
-		foreach ($universe['carriers'] as &$carrier)
+		// if this is a dark galaxy, hide carriers and stars
+		if ($game_settings['dark_galaxy'])
 		{
-			self::renameArrayKey($carrier, 'uid', 'id');
-			self::renameArrayKey($carrier, 'n', 'name');
-			self::renameArrayKey($carrier, 'puid', 'player_id');
-			self::renameArrayKey($carrier, 'st', 'ship_count');
-			self::renameArrayKey($carrier, 'o', 'waypoints');
-
-			foreach ($carrier['waypoints'] as &$waypoint)
-			{
-				$newWaypoint['star_id'] = $waypoint[1];
-				$newWaypoint['ship_count'] = $waypoint[3];
-
-				// find action name
-				switch ($waypoint[2])
-				{
-					case 0:
-						$newWaypoint['action'] = 'do_nothing';
-						unset($newWaypoint['ship_count']);
-						break;
-					case 1:
-						$newWaypoint['action'] = 'collect_all';
-						unset($newWaypoint['ship_count']);
-						break;
-					case 2:
-						$newWaypoint['action'] = 'drop_all';
-						unset($newWaypoint['ship_count']);
-						break;
-					case 3:
-						$newWaypoint['action'] = 'collect';
-						break;
-					case 4:
-						$newWaypoint['action'] = 'drop';
-						break;
-					case 5:
-						$newWaypoint['action'] = 'collect_all_but';
-						break;
-					case 6:
-						$newWaypoint['action'] = 'garrison_star';
-						break;
-					default:
-						$newWaypoint['action'] = 'do_nothing';
-						break;
-				}
-
-				$waypoint = $newWaypoint;
-			}
+			unset($universe['carriers']);
+			unset($universe['stars']);
 		}
-
-		foreach ($universe['stars'] as &$star)
+		else
 		{
-			self::renameArrayKey($star, 'uid', 'id');
-			self::renameArrayKey($star, 'n', 'name');
-			self::renameArrayKey($star, 'puid', 'player_id');
-			self::renameArrayKey($star, 'st', 'ship_count');
-			self::renameArrayKey($star, 'e', 'economy');
-			self::renameArrayKey($star, 'i', 'industry');
-			self::renameArrayKey($star, 's', 'science');
-			self::renameArrayKey($star, 'nr', 'natural_resources');
-			self::renameArrayKey($star, 'r', 'radius');
-			self::renameArrayKey($star, 'ga', 'has_gate');
+			// reformat carriers and stars
+			foreach ($universe['carriers'] as &$carrier)
+			{
+				self::renameArrayKey($carrier, 'uid', 'id');
+				self::renameArrayKey($carrier, 'n', 'name');
+				self::renameArrayKey($carrier, 'puid', 'player_id');
+				self::renameArrayKey($carrier, 'st', 'ship_count');
+				self::renameArrayKey($carrier, 'o', 'waypoints');
+
+				foreach ($carrier['waypoints'] as &$waypoint)
+				{
+					$newWaypoint['star_id'] = $waypoint[1];
+					$newWaypoint['ship_count'] = $waypoint[3];
+
+					// find action name
+					switch ($waypoint[2])
+					{
+						case 0:
+							$newWaypoint['action'] = 'do_nothing';
+							unset($newWaypoint['ship_count']);
+							break;
+						case 1:
+							$newWaypoint['action'] = 'collect_all';
+							unset($newWaypoint['ship_count']);
+							break;
+						case 2:
+							$newWaypoint['action'] = 'drop_all';
+							unset($newWaypoint['ship_count']);
+							break;
+						case 3:
+							$newWaypoint['action'] = 'collect';
+							break;
+						case 4:
+							$newWaypoint['action'] = 'drop';
+							break;
+						case 5:
+							$newWaypoint['action'] = 'collect_all_but';
+							break;
+						case 6:
+							$newWaypoint['action'] = 'garrison_star';
+							break;
+						default:
+							$newWaypoint['action'] = 'do_nothing';
+							break;
+					}
+
+					$waypoint = $newWaypoint;
+				}
+			}
+
+			foreach ($universe['stars'] as &$star)
+			{
+				self::renameArrayKey($star, 'uid', 'id');
+				self::renameArrayKey($star, 'n', 'name');
+				self::renameArrayKey($star, 'puid', 'player_id');
+				self::renameArrayKey($star, 'st', 'ship_count');
+				self::renameArrayKey($star, 'e', 'economy');
+				self::renameArrayKey($star, 'i', 'industry');
+				self::renameArrayKey($star, 's', 'science');
+				self::renameArrayKey($star, 'nr', 'natural_resources');
+				self::renameArrayKey($star, 'r', 'radius');
+				self::renameArrayKey($star, 'ga', 'has_gate');
+			}
 		}
 
 		// set/unset extra fields
