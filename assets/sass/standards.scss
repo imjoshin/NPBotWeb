@@ -89,6 +89,10 @@ form {
 	&:hover {
 		cursor: pointer;
 	}
+
+	&:not(.btn-red):hover {
+		background-color: $orange;
+	}
 }
 
 .disabled {

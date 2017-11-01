@@ -140,7 +140,7 @@ class Game
 	}
 
 	// response is different here because its used as a public endpoint
-	public static function getGameInfo($game_id)
+	public static function getGameInfo($game_id, $var = 'all')
 	{
 		ob_start();
 		$settings = dbQuery("SELECT * FROM notification_settings WHERE game_id = ?", array($game_id));
@@ -150,6 +150,18 @@ class Game
 		}
 
 		$client = User::getGameClient($settings[0]['owner_user_id']);
+
+		$server = $client->GetServer();
+		if (!$server)
+		{
+			return array("error" => "Failed to fetch server data.");
+		}
+
+		$player = $server->GetPlayer();
+		if (!$player)
+		{
+			return array("error" => "Failed to fetch game data.");
+		}
 
 		$game = $client->GetGame($game_id);
 		if (!$game)
@@ -163,6 +175,35 @@ class Game
 			return array("error" => "Failed to fetch universe data.");
 		}
 
+		// get list of games to find game settings
+		$games = (isset($player['open_games']) ? $player['open_games'] : array());
+		foreach ($games as $g)
+		{
+			if ($g['number'] == $game_id)
+			{
+				$game_settings = $g;
+				break;
+			}
+		}
+
+		$game_settings = self::getSettings($client, $universe, $game_settings);
+
+		switch ($var)
+		{
+			case 'latest':
+				return self::getLatestTurn($client, $universe, $game_settings);
+			case 'all':
+				return self::getAllTurns($client, $universe, $game_settings);
+			case 'settings':
+				return $game_settings;
+			default:
+				return self::getTurn($client, $universe, $turn, $game_settings);
+		}
+
+	}
+
+	public static function getLatestTurn($client, $universe, $game_settings)
+	{
 		// logic for player data from https://github.com/BrandonDusseau/np2-wallboard/blob/master/game.php
 		// Modify player information to remove private data and add attributes
 		if (!empty($universe['players']))
@@ -191,8 +232,8 @@ class Game
 				$player = array_diff_key($player, array_flip($player_strip));
 
 				// Rename 'alias' to 'name' for consistency.
-				$player['name'] = $player['alias'];
-				unset($player['alias']);
+				self::renameArrayKey($player, 'uid', 'id');
+				self::renameArrayKey($player, 'alias', 'name');
 
 				foreach ($player['tech'] as &$tech)
 				{
@@ -201,13 +242,13 @@ class Game
 				}
 
 				// Add player color and shape
-				$player['color'] = $player_colors[$player['uid'] % 8];
-				$player['shape'] = $player['uid'] % 8;
-				$players_rekeyed[$player['uid']] = $player;
-				$rank[] = ['player' => $player['uid'], 'stars' => $player['total_stars'], 'ships' => $player['total_strength']];
+				$player['color'] = $player_colors[$player['id'] % 8];
+				$player['shape'] = $player['id'] % 8;
+				$players_rekeyed[$player['id']] = $player;
+				$rank[] = ['player' => $player['id'], 'stars' => $player['total_stars'], 'ships' => $player['total_strength']];
 			}
 
-			// Rank the players by stars, ships, then UID.
+			// Rank the players by stars, ships, then id.
 			usort(
 				$rank,
 				function ($a, $b)
@@ -222,7 +263,7 @@ class Game
 					{
 						return -1;
 					}
-					// Otherwise, everything is equal and we should just sort by UID
+					// Otherwise, everything is equal and we should just sort by id
 					else
 					{
 						return ($a['player'] - $b['player']);
@@ -240,9 +281,123 @@ class Game
 			$universe['players'] = $players_rekeyed;
 		}
 
-		unset($universe['stars']);
-		unset($universe['fleets']);
+		self::renameArrayKey($universe, 'fleets', 'carriers');
+
+		// TODO detect if this is a dark game. If so, hide carriers and stars
+		foreach ($universe['carriers'] as &$carrier)
+		{
+			self::renameArrayKey($carrier, 'uid', 'id');
+			self::renameArrayKey($carrier, 'n', 'name');
+			self::renameArrayKey($carrier, 'puid', 'player_id');
+			self::renameArrayKey($carrier, 'st', 'ship_count');
+			self::renameArrayKey($carrier, 'o', 'waypoints');
+
+			foreach ($carrier['waypoints'] as &$waypoint)
+			{
+				$newWaypoint['star_id'] = $waypoint[1];
+				$newWaypoint['ship_count'] = $waypoint[3];
+
+				// find action name
+				switch ($waypoint[2])
+				{
+					case 0:
+						$newWaypoint['action'] = 'do_nothing';
+						unset($newWaypoint['ship_count']);
+						break;
+					case 1:
+						$newWaypoint['action'] = 'collect_all';
+						unset($newWaypoint['ship_count']);
+						break;
+					case 2:
+						$newWaypoint['action'] = 'drop_all';
+						unset($newWaypoint['ship_count']);
+						break;
+					case 3:
+						$newWaypoint['action'] = 'collect';
+						break;
+					case 4:
+						$newWaypoint['action'] = 'drop';
+						break;
+					case 5:
+						$newWaypoint['action'] = 'collect_all_but';
+						break;
+					case 6:
+						$newWaypoint['action'] = 'garrison_star';
+						break;
+					default:
+						$newWaypoint['action'] = 'do_nothing';
+						break;
+				}
+
+				$waypoint = $newWaypoint;
+			}
+		}
+
+		foreach ($universe['stars'] as &$star)
+		{
+			self::renameArrayKey($star, 'uid', 'id');
+			self::renameArrayKey($star, 'n', 'name');
+			self::renameArrayKey($star, 'puid', 'player_id');
+			self::renameArrayKey($star, 'st', 'ship_count');
+			self::renameArrayKey($star, 'e', 'economy');
+			self::renameArrayKey($star, 'i', 'industry');
+			self::renameArrayKey($star, 's', 'science');
+			self::renameArrayKey($star, 'nr', 'natural_resources');
+			self::renameArrayKey($star, 'r', 'radius');
+			self::renameArrayKey($star, 'ga', 'has_gate');
+		}
+
+		// set/unset extra fields
 		unset($universe['now']);
+		unset($universe['trade_cost']);
+		unset($universe['trade_scanned']);
+		unset($universe['player_uid']);
+		self::renameArrayKey($universe, 'fleet_speed', 'carrier_speed');
+		$universe['turn_jump_ticks'] = $game_settings['turn_jump_ticks'];
+		$universe['turn_num'] = ($universe['tick'] / $universe['turn_jump_ticks']) + ($universe['production_counter'] / $universe['turn_jump_ticks']);
+
+		ksort($universe);
 		return $universe;
+	}
+
+	public static function getAllTurns($client, $universe, $game_settings)
+	{
+		return array("message" => "Getting all turns.");
+	}
+
+	public static function getTurn($client, $universe, $turn, $game_settings)
+	{
+		return array("message" => "Getting turn $turn.");
+	}
+
+	public static function getSettings($client, $universe, $game_settings)
+	{
+		$game_settings = array_merge($game_settings, $game_settings['config']);
+		unset($game_settings['config']);
+
+		// rename keys to match standard
+		foreach ($game_settings as $old_key => $value)
+		{
+			$new_key = strtolower(preg_replace('/([A-Z]+)/', '_$1', $old_key));
+			self::renameArrayKey($game_settings, $old_key, $new_key);
+		}
+
+		$game_settings['stars_for_victory'] = $universe['stars_for_victory'];
+		$game_settings['start_time'] = $universe['start_time'];
+		$game_settings['total_stars'] = $universe['total_stars'];
+		$game_settings['carrier_speed'] = $universe['fleet_speed'];
+		self::renameArrayKey($game_settings, 'production_ticks', 'production_rate');
+
+		ksort($game_settings);
+		return $game_settings;
+	}
+
+	private static function renameArrayKey(&$array, $old_key, $new_key)
+	{
+		if (array_key_exists($old_key, $array))
+		{
+			$array[$new_key] = $array[$old_key];
+			unset($array[$old_key]);
+		}
 	}
 }

@@ -9,5 +9,5 @@ if (!isset($_GET['game_id']))
 	echo json_encode(array("error" => "No game ID given."));
 }
 
-echo json_encode(Game::getGameInfo($_GET['game_id']));
+echo json_encode(Game::getGameInfo($_GET['game_id'], isset($_GET['v']) ? $_GET['v'] : 'all'));
 ?>
