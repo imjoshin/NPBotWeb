@@ -90,13 +90,14 @@ class Game
 
 		if ($new_settings)
 		{
-			$fields = "game_id, player_id, print_leaderboard, print_turns_taken, print_n_last_players, print_warning, " .
+			$fields = "game_id, player_id, user_id, print_leaderboard, print_turns_taken, print_n_last_players, print_warning, " .
 					  "leaderboard_format, leaderboard_text_format, webhook_name, webhook_url, webhook_image, webhook_channel";
 			$result = dbQuery(
 				"INSERT INTO notification_settings($fields) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				array(
 					$form['game_id'],
 					$_SESSION['player_id'],
+					$_SESSION['id'],
 					isset($form['print_leaderboard']) && $form['print_leaderboard'] == 'on',
 					isset($form['print_turns_taken']) && $form['print_turns_taken'] == 'on',
 					$form['print_n_last_players'],
@@ -136,9 +137,10 @@ class Game
 				// update player_id in case someone that is not the admin set this up
 				// also this is super hacky
 				dbQuery(
-					"UPDATE notification_settings SET player_id = ? WHERE game_id = ?",
+					"UPDATE notification_settings SET player_id = ?, user_id = ? WHERE game_id = ?",
 					array(
 						$_SESSION['player_id'],
+						$_SESSION['id'],
 						$form['game_id']
 					)
 				);
@@ -161,7 +163,7 @@ class Game
 			return array("error" => "Game ID has not been set up.");
 		}
 
-		$client = User::getGameClient($settings[0]['owner_user_id']);
+		$client = User::getGameClient($settings[0]['user_id']);
 
 		$server = $client->GetServer();
 		if (!$server)
@@ -174,8 +176,6 @@ class Game
 		{
 			return array("error" => "Failed to fetch game data.");
 		}
-
-		return $player;
 
 		$game = $client->GetGame($game_id);
 		if (!$game)
