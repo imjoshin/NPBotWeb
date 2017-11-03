@@ -248,6 +248,8 @@ class Game
 				// Rename 'alias' to 'name' for consistency.
 				self::renameArrayKey($player, 'uid', 'id');
 				self::renameArrayKey($player, 'alias', 'name');
+				self::renameArrayKey($player, 'total_fleets', 'total_carriers');
+				self::renameArrayKey($player, 'total_strength', 'total_ships');
 
 				foreach ($player['tech'] as &$tech)
 				{
@@ -259,7 +261,7 @@ class Game
 				$player['color'] = $player_colors[$player['id'] % 8];
 				$player['shape'] = $player['id'] % 8;
 				$players_rekeyed[$player['id']] = $player;
-				$rank[] = ['player' => $player['id'], 'stars' => $player['total_stars'], 'ships' => $player['total_strength']];
+				$rank[] = ['player' => $player['id'], 'stars' => $player['total_stars'], 'ships' => $player['total_ships']];
 			}
 
 			// Rank the players by stars, ships, then id.
@@ -370,6 +372,12 @@ class Game
 			}
 		}
 
+		foreach ($universe['players'] as &$player)
+		{
+			ksort($player);
+			ksort($player['tech']);
+		}
+
 		// set/unset extra fields
 		unset($universe['now']);
 		unset($universe['trade_cost']);
@@ -377,7 +385,7 @@ class Game
 		unset($universe['player_uid']);
 		self::renameArrayKey($universe, 'fleet_speed', 'carrier_speed');
 		$universe['turn_jump_ticks'] = $game_settings['turn_jump_ticks'];
-		$universe['turn_num'] = ($universe['tick'] / $universe['turn_jump_ticks']) + ($universe['production_counter'] / $universe['turn_jump_ticks']);
+		$universe['turn_num'] = ($universe['tick'] / $universe['turn_jump_ticks']) + ($universe['production_counter'] / $universe['turn_jump_ticks']) + 1;
 
 		ksort($universe);
 		return $universe;
@@ -409,7 +417,11 @@ class Game
 		$game_settings['start_time'] = $universe['start_time'];
 		$game_settings['total_stars'] = $universe['total_stars'];
 		$game_settings['carrier_speed'] = $universe['fleet_speed'];
+		$game_settings['name'] = $universe['name'];
 		self::renameArrayKey($game_settings, 'production_ticks', 'production_rate');
+		self::renameArrayKey($game_settings, 'number', 'id');
+		unset($game_settings['status']);
+		unset($game_settings['creator']);
 
 		ksort($game_settings);
 		return $game_settings;
@@ -417,7 +429,7 @@ class Game
 
 	private static function renameArrayKey(&$array, $old_key, $new_key)
 	{
-		if (array_key_exists($old_key, $array))
+		if ($old_key !== $new_key && array_key_exists($old_key, $array))
 		{
 			$array[$new_key] = $array[$old_key];
 			unset($array[$old_key]);
