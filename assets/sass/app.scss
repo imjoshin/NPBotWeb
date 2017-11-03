@@ -55,3 +55,21 @@ body {
 #gamelist {
 	margin-bottom: 30px;
 }
+
+#player-table {
+	margin: 0 auto 20px;
+
+	td {
+		width: 50%;
+		padding: 3px 10px;
+
+		&:first-child {
+			text-align: right;
+		}
+
+		input {
+			text-align: left;
+			max-width: 80%;
+		}
+	}
+}

@@ -31,20 +31,36 @@ class Game
 		$ret = array();
 		foreach ($games as $game)
 		{
-			$game_config = dbQuery("SELECT * FROM notification_settings WHERE game_id = ?", array($game['number']));
-			$new_game = array("name" => $game['name']);
-
-			// if current user is owner of game or admin
-			if ($game['config']['adminUserId'] == $_SESSION['player_id'] || $_SESSION['admin'])
-			{
-				$new_game['fields'] = count($game_config) ? $game_config[0] : array('game_id' => $game['number']);
-				unset($new_game['fields']['player_id']);
-			}
-
-			$ret[] = $new_game;
+			$ret[] = self::getGame($game['number'], $game, true);
 		}
 
 		return $ret;
+	}
+
+	private static function getGame($game_id, $game = null,  $check_permission = false)
+	{
+		$game_config = dbQuery("SELECT * FROM notification_settings WHERE game_id = ?", array($game_id));
+
+		if (isset($game))
+		{
+			$new_game = array("name" => $game['name']);
+		}
+
+		$players = dbQuery("SELECT id, name, nickname FROM player WHERE game_id = ?", array($game_id));
+
+		// if current user is owner of game or admin
+		if (!$check_permission || $game['config']['adminUserId'] == $_SESSION['player_id'] || $_SESSION['admin'])
+		{
+			$new_game['fields'] = count($game_config) ? $game_config[0] : array('game_id' => $game_id);
+			if (count($players))
+			{
+				$new_game['fields']['players'] = $players;
+			}
+
+			unset($new_game['fields']['player_id']);
+		}
+
+		return $new_game;
 	}
 
 	public static function saveSettings($form)
@@ -86,6 +102,18 @@ class Game
 			return array('success'=>false, 'output'=>array(
 				"message"=>"Invalid webhook image."
 			));
+		}
+
+		// set player nicknames
+		if (isset($form['players']))
+		{
+			foreach($form['players'] as $id => $nickname)
+			{
+				if (trim($nickname) != "")
+				{
+					dbQuery("UPDATE player SET nickname = ? WHERE game_id = ? AND id = ?", array($nickname, $form['game_id'], $id));
+				}
+			}
 		}
 
 		if ($new_settings)
@@ -147,10 +175,8 @@ class Game
 			}
 		}
 
-		$settings = dbQuery("SELECT * FROM notification_settings WHERE game_id = ?", array($form['game_id']));
-
-		unset($settings[0]['player_id']);
-		return array('success'=>true, 'output'=>$settings[0]);
+		$game_data = self::getGame($form['game_id']);
+		return array('success'=>true, 'output'=>$game_data['fields']);
 	}
 
 	// response is different here because its used as a public endpoint

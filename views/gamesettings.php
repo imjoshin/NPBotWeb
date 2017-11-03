@@ -52,9 +52,18 @@
 	<div class="category">
 		<span>Nicknames</span>
 	</div>
-	<div class="field">
-		<span id='no-players-yet'>Players have not been added yet. Please hold tight and wait for the first game scan to complete!</span>
+	<div class="field" id='no-players-yet'>
+		<span>Players have not been added yet. Please hold tight and wait for the first game scan to complete!</span>
 	</div>
+	<table id='player-table'>
+		<tr class='template'>
+			<td>
+			</td>
+			<td>
+				<input type='text' maxlength="32">
+			</td>
+		</tr>
+	</table>
 	<input type='hidden' name='game_id'></input>
 	<div class="btn btn-red btn-block btn-center">Save</div>
 </form>

@@ -6,12 +6,21 @@ $().ready(function() {
 		if ($(this).attr('data-type') == "discord") {
 			if ($(this).val().indexOf('hooks.slack.com/services') >= 0) {
 				$(this).attr('data-type', 'slack');
-				$('#slack-channel').slideDown(150);
+
+				if ($('#gamesettings').is(":visible")) {
+					$('#slack-channel').slideDown(150);
+				} else {
+					$('#slack-channel').show();
+				}
 			}
 		} else if ($(this).attr('data-type') == "slack") {
 			if ($(this).val().indexOf('discordapp.com/api/webhooks') >= 0) {
 				$(this).attr('data-type', 'discord');
-				$('#slack-channel').slideUp(150);
+				if ($('#gamesettings').is(":visible")) {
+					$('#slack-channel').slideUp(150);
+				} else {
+					$('#slack-channel').hide();
+				}
 			}
 		}
 	});
@@ -32,6 +41,8 @@ $().ready(function() {
 		$('#leaderboard-field').show();
 		$(this).attr('data-type', 'discord');
 		$('#slack-channel').hide();
+		$('#no-players-yet').show();
+		$('#player-table tr:not(.template)').remove();
 	});
 
 	$('.btn-game').on('click', function() {
@@ -54,7 +65,20 @@ $().ready(function() {
 			}
 		});
 
-		// TODO fix hide/show settings like leaderboard and channel id
+		if ('players' in fields) {
+			$('#no-players-yet').hide();
+			$.each(fields['players'], function(key, player) {
+				var row = $('#player-table .template').clone();
+				row.removeClass('template');
+				row.find('td:first-child').text(player['name']);
+				row.find('input').val(player['nickname']);
+				row.find('input').attr('name', 'players[' + player['id'] + ']');
+				row.attr('data-id', player['id']);
+				$('#player-table').append(row);
+			});
+		}
+
+		$("#webhook-url").trigger('keyup');
 
 		$('#gamesettings').show();
 	});
