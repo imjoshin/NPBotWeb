@@ -2,7 +2,7 @@ $(document).foundation()
 
 $().ready(function() {
 	// show channel field if slack webhook
-	$("#webhook-url").on('keyup', function() {
+	$("#webhook-url").on('keypress', function() {
 		if ($(this).attr('data-type') == "discord") {
 			if ($(this).val().indexOf('hooks.slack.com/services') >= 0) {
 				$(this).attr('data-type', 'slack');
@@ -27,7 +27,7 @@ $().ready(function() {
 
 	$('#settings input[type="checkbox"]').on('change', function() {
 		var field = $("#" + $(this).attr('name').replace(/\_/g, '-') + '-field');
-		
+
 		if ($(this).is(':checked')) {
 			if ($('#gamesettings').is(":visible")) {
 				field.slideDown(150);
@@ -92,7 +92,7 @@ $().ready(function() {
 			});
 		}
 
-		$("#webhook-url").trigger('keyup');
+		$("#webhook-url").trigger('keypress');
 		$('#settings input[type="checkbox"]').trigger('change');
 
 		$('#gamesettings').show();
