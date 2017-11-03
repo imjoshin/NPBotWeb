@@ -25,11 +25,25 @@ $().ready(function() {
 		}
 	});
 
-	$('#print-leaderboard').on('change', function() {
+	$('#settings input[type="checkbox"]').on('change', function() {
+		var field = $("#" + $(this).attr('name').replace(/\_/g, '-') + '-field');
+		
 		if ($(this).is(':checked')) {
-			$('#leaderboard-field').slideDown(150);
+			if ($('#gamesettings').is(":visible")) {
+				field.slideDown(150);
+			} else {
+				field.show();
+			}
+
+			$(this).siblings("input").prop('disabled', false);
 		} else {
-			$('#leaderboard-field').slideUp(150);
+			if ($('#gamesettings').is(":visible")) {
+				field.slideUp(150);
+			} else {
+				field.hide();
+			}
+
+			$(this).siblings("input").prop('disabled', true);
 		}
 	});
 
@@ -79,6 +93,7 @@ $().ready(function() {
 		}
 
 		$("#webhook-url").trigger('keyup');
+		$('#settings input[type="checkbox"]').trigger('change');
 
 		$('#gamesettings').show();
 	});

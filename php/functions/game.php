@@ -118,45 +118,43 @@ class Game
 
 		if ($new_settings)
 		{
-			$fields = "game_id, player_id, user_id, print_leaderboard, print_turns_taken, print_n_last_players, print_warning, " .
-					  "leaderboard_format, leaderboard_text_format, webhook_name, webhook_url, webhook_image, webhook_channel";
+			$fields = "game_id, player_id, user_id, print_turn_start_format, " .
+					  "print_leaderboard, print_leaderboard_format, " .
+		  			  "print_turns_taken, print_turns_taken_format, " .
+					  "print_last_players, print_last_players_n, print_last_players_format, " .
+					  "print_warning, print_warning_n, print_warning_format, " .
+		  			  "webhook_name, webhook_url, webhook_image, webhook_channel";
 			$result = dbQuery(
-				"INSERT INTO notification_settings($fields) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"INSERT INTO notification_settings($fields) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				array(
-					$form['game_id'],
-					$_SESSION['player_id'],
-					$_SESSION['id'],
-					isset($form['print_leaderboard']) && $form['print_leaderboard'] == 'on',
-					isset($form['print_turns_taken']) && $form['print_turns_taken'] == 'on',
-					$form['print_n_last_players'],
-					$form['print_warning'],
-					trim($form['leaderboard_format']),
-					trim($form['leaderboard_text_format']),
-					trim($form['webhook_name']),
-					trim($form['webhook_url']),
-					trim($form['webhook_image']),
-					trim($form['webhook_channel'])
+					$form['game_id'], $_SESSION['player_id'], $_SESSION['id'], trim($form['print_turn_start_format']),
+					isset($form['print_leaderboard']) && $form['print_leaderboard'] == 'on', trim($form['print_leaderboard_format']),
+					isset($form['print_turns_taken']) && $form['print_turns_taken'] == 'on', trim($form['print_turns_taken_format']),
+					isset($form['print_last_players']) && $form['print_last_players'] == 'on', $form['print_last_players_n'], trim($form['print_last_players_format']),
+					isset($form['print_warning']) && $form['print_warning'] == 'on', $form['print_warning_n'], trim($form['print_warning_format']),
+					trim($form['webhook_name']), trim($form['webhook_url']), trim($form['webhook_image']), trim($form['webhook_channel'])
 				)
 			);
 		}
 		else
 		{
-			$fields = "print_leaderboard = ?, print_turns_taken = ?, print_n_last_players = ?, print_warning = ?, leaderboard_format = ?, " .
-					  "leaderboard_text_format = ?, webhook_name = ?, webhook_url = ?, webhook_image = ?, webhook_channel = ?";
+			$fields = "print_turn_start_format = ?, " .
+					  "print_leaderboard = ?, print_leaderboard_format = ?, " .
+		  			  "print_turns_taken = ?, print_turns_taken_format = ?, " .
+					  "print_last_players = ?, print_last_players_n = ?, print_last_players_format = ?, " .
+					  "print_warning = ?, print_warning_n = ?, print_warning_format = ?, " .
+		  			  "webhook_name = ?, webhook_url = ?, webhook_image = ?, webhook_channel = ?";
+			//error_log("UPDATE notification_settings SET $fields WHERE game_id = ?");
 			$result = dbQuery(
 				"UPDATE notification_settings SET $fields WHERE game_id = ?",
 				array(
-					isset($form['print_leaderboard']) && $form['print_leaderboard'] == 'on',
-					isset($form['print_turns_taken']) && $form['print_turns_taken'] == 'on',
-					$form['print_n_last_players'],
-					$form['print_warning'],
-					$form['leaderboard_format'],
-					$form['leaderboard_text_format'],
-					$form['webhook_name'],
-					$form['webhook_url'],
-					$form['webhook_image'],
-					$form['webhook_channel'],
-					$form['game_id'],
+					trim($form['print_turn_start_format']),
+					isset($form['print_leaderboard']) && $form['print_leaderboard'] == 'on', trim($form['print_leaderboard_format']),
+					isset($form['print_turns_taken']) && $form['print_turns_taken'] == 'on', trim($form['print_turns_taken_format']),
+					isset($form['print_last_players']) && $form['print_last_players'] == 'on', isset($form['print_last_players_n']) ? $form['print_last_players_n'] : 1, trim($form['print_last_players_format']),
+					isset($form['print_warning']) && $form['print_warning'] == 'on', isset($form['print_warning_n']) ? $form['print_warning_n'] : 2, trim($form['print_warning_format']),
+					trim($form['webhook_name']), trim($form['webhook_url']), trim($form['webhook_image']), trim($form['webhook_channel']),
+					$form['game_id']
 				)
 			);
 
