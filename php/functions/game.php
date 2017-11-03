@@ -250,6 +250,7 @@ class Game
 				self::renameArrayKey($player, 'alias', 'name');
 				self::renameArrayKey($player, 'total_fleets', 'total_carriers');
 				self::renameArrayKey($player, 'total_strength', 'total_ships');
+				self::renameArrayKey($player, 'conceded', 'status');
 
 				foreach ($player['tech'] as &$tech)
 				{
@@ -259,7 +260,7 @@ class Game
 
 				// Add player color and shape
 				$player['color'] = $player_colors[$player['id'] % 8];
-				$player['shape'] = $player['id'] % 8;
+				$player['shape'] = floor($player['id'] / 8);
 				$players_rekeyed[$player['id']] = $player;
 				$rank[] = ['player' => $player['id'], 'stars' => $player['total_stars'], 'ships' => $player['total_ships']];
 			}
@@ -384,8 +385,9 @@ class Game
 		unset($universe['trade_scanned']);
 		unset($universe['player_uid']);
 		self::renameArrayKey($universe, 'fleet_speed', 'carrier_speed');
+		self::renameArrayKey($universe, 'turn_based_time_out', 'time_out');
 		$universe['turn_jump_ticks'] = $game_settings['turn_jump_ticks'];
-		$universe['turn_num'] = ($universe['tick'] / $universe['turn_jump_ticks']) + ($universe['production_counter'] / $universe['turn_jump_ticks']) + 1;
+		$universe['turn_num'] = ($universe['tick'] / $universe['turn_jump_ticks']) + 1;
 
 		ksort($universe);
 		return $universe;
