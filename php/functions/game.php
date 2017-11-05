@@ -144,7 +144,6 @@ class Game
 					  "print_last_players = ?, print_last_players_n = ?, print_last_players_format = ?, " .
 					  "print_warning = ?, print_warning_n = ?, print_warning_format = ?, " .
 		  			  "webhook_name = ?, webhook_url = ?, webhook_image = ?, webhook_channel = ?";
-			//error_log("UPDATE notification_settings SET $fields WHERE game_id = ?");
 			$result = dbQuery(
 				"UPDATE notification_settings SET $fields WHERE game_id = ?",
 				array(
@@ -246,6 +245,9 @@ class Game
 		// Modify player information to remove private data and add attributes
 		if (!empty($universe['players']))
 		{
+			$universe['turn_jump_ticks'] = $game_settings['turn_jump_ticks'];
+			$universe['turn_num'] = $universe['started'] ? ($universe['tick'] / $universe['turn_jump_ticks']) + 1 : 0;
+
 			// Define colors for the players. These eight colors are repeated with each set of eight players.
 			$player_colors = [
 				"#0000FF",
@@ -285,8 +287,22 @@ class Game
 				// Add player color and shape
 				$player['color'] = $player_colors[$player['id'] % 8];
 				$player['shape'] = floor($player['id'] / 8);
-				$players_rekeyed[$player['id']] = $player;
 				$rank[] = ['player' => $player['id'], 'stars' => $player['total_stars'], 'ships' => $player['total_ships']];
+
+				if ($universe['turn_num'] > 1)
+				{
+					$last_turn = dbQuery(
+						"SELECT * FROM player_turn WHERE player_id = ? AND turn_id = ? AND game_id = ?",
+						array($player['id'], $universe['turn_num'] - 1, $game_settings['id'])
+					);
+					if (count($last_turn) > 0)
+					{
+						$player['rank_last'] = $last_turn[0]['rank'];
+						error_log($last_turn[0]['rank']);
+					}
+				}
+
+				$players_rekeyed[$player['id']] = $player;
 			}
 
 			// Rank the players by stars, ships, then id.
@@ -408,11 +424,16 @@ class Game
 		unset($universe['trade_cost']);
 		unset($universe['trade_scanned']);
 		unset($universe['player_uid']);
+		unset($universe['start_time']);
 		self::renameArrayKey($universe, 'fleet_speed', 'carrier_speed');
-		self::renameArrayKey($universe, 'turn_based_time_out', 'time_out');
-		$universe['turn_jump_ticks'] = $game_settings['turn_jump_ticks'];
-		$universe['turn_num'] = ($universe['tick'] / $universe['turn_jump_ticks']) + 1;
+		self::renameArrayKey($universe, 'turn_based_time_out', 'turn_end');
 
+		if ($universe['started'])
+		{
+			$universe['turn_end'] = intval($universe['turn_end'] / 1000);
+			$universe['turn_start'] = intval($universe['turn_end'] - ($game_settings['turn_time'] * 60 * 60));
+		}
+		
 		ksort($universe);
 		return $universe;
 	}
