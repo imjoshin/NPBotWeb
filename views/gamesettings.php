@@ -59,6 +59,7 @@
 	<div id='print-warning-field' class="field">
 		<input name='print_warning_format' type='text' value="There are only *%HOURS%* hours left to take your turn!" maxlength="512">
 	</div>
+	<a class="btn btn-block btn-center" href="dist/emoji.zip">Download Emojis</a>
 	<div class="category">
 		<span>Nicknames</span>
 	</div>

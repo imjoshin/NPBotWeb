@@ -101,7 +101,7 @@ $().ready(function() {
 		$('#gamesettings').show();
 	});
 
-	$(document).on('click', '#settings .btn:not(.disabled)', function() {
+	$(document).on('click', '#settings div.btn:not(.disabled)', function() {
 		var btn = $(this);
 		btn.addClass('disabled');
 
