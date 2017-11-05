@@ -2,10 +2,12 @@ $(document).foundation()
 
 $().ready(function() {
 	// show channel field if slack webhook
-	$("#webhook-url").on('keypress', function() {
+	$("#webhook-url").on('keyup', function() {
+		console.log($(this).val());
 		if ($(this).attr('data-type') == "discord") {
 			if ($(this).val().indexOf('hooks.slack.com/services') >= 0) {
 				$(this).attr('data-type', 'slack');
+				console.log("changing to slack");
 
 				if ($('#gamesettings').is(":visible")) {
 					$('#slack-channel').slideDown(150);
@@ -16,6 +18,7 @@ $().ready(function() {
 		} else if ($(this).attr('data-type') == "slack") {
 			if ($(this).val().indexOf('discordapp.com/api/webhooks') >= 0) {
 				$(this).attr('data-type', 'discord');
+				console.log("changing to discord");
 				if ($('#gamesettings').is(":visible")) {
 					$('#slack-channel').slideUp(150);
 				} else {
@@ -53,7 +56,7 @@ $().ready(function() {
 
 		$("#settings").trigger('reset');
 		$('#leaderboard-field').show();
-		$(this).attr('data-type', 'discord');
+		$('#webhook-url').attr('data-type', 'discord');
 		$('#slack-channel').hide();
 		$('#no-players-yet').show();
 		$('#player-table tr:not(.template)').remove();
@@ -92,7 +95,7 @@ $().ready(function() {
 			});
 		}
 
-		$("#webhook-url").trigger('keypress');
+		$("#webhook-url").trigger('keyup');
 		$('#settings input[type="checkbox"]').trigger('change');
 
 		$('#gamesettings').show();

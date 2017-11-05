@@ -16,7 +16,7 @@
 	</div>
 	<div class="field">
 		<span class='block'>Webhook Name</span>
-		<input name='webhook_name' type='text' maxlength="32" value="Neptune's Pride">
+		<input name='webhook_name' type='text' maxlength="32" value="NeptuneBot">
 	</div>
 	<div class="field">
 		<span class='block'>Webhook Image</span>
@@ -27,14 +27,14 @@
 	</div>
 	<div class="field">
 		<span class='block'>Turn Start</span>
-		<input name='print_turn_start_format' type='text' value="Turn *%TURN%* just started! Here is the leaderboard:" maxlength="512">
+		<input name='print_turn_start_format' type='text' value="Turn *%TURN%* just started! It ends %TURNEND%.\nHere is the leaderboard:" maxlength="512">
 	</div>
 	<div class="field">
 		<span>Turn Leaderboard</span>
 		<input name='print_leaderboard' type='checkbox' checked="checked">
 	</div>
 	<div id='print-leaderboard-field' class="field">
-		<input name='print_leaderboard_format' type='text' value=":np-star: %STARS% :np-ship: %SHIPS% :np-res: %TECH%\n:np-econ: %ECON% :np-ind: %INDUSTRY% :np-sci: %SCIENCE%" maxlength="512">
+		<input name='print_leaderboard_format' type='text' value=":np-star: %STARS% :np-ship: %SHIPS% :np-tech: %TECH%\n:np-econ: %ECON% :np-ind: %INDUSTRY% :np-sci: %SCIENCE%" maxlength="512">
 	</div>
 	<div class="field">
 		<span>Player Turns Taken</span>
@@ -46,10 +46,10 @@
 	<div class="field">
 		<span>Last Players Warning</span>
 		<input name='print_last_players' type='checkbox' checked="checked">
-		<input name='print_last_players_n' type='number' value="1" min="1" max="32">
+		<input name='print_last_players_n' type='number' value="2" min="1" max="32">
 	</div>
 	<div id='print-last-players-field' class="field">
-		<input name='print_last_players_format' type='text' value="There are *%COUNT%* players left to taken their turn\n%PLAYERS%" maxlength="512">
+		<input name='print_last_players_format' type='text' value="There are *%COUNT%* players left to taken their turn.\n%PLAYERS%" maxlength="512">
 	</div>
 	<div class="field">
 		<span>Turn End Warning (hrs)</span>
