@@ -1,4 +1,5 @@
 <?php
+//error_reporting(0); // Disable all errors.
 
 require_once(BASE_PATH . "triton/client.php");
 require_once(BASE_PATH . 'functions/user.php');
@@ -121,15 +122,17 @@ class Game
 			$fields = "game_id, player_id, user_id, print_turn_start_format, " .
 					  "print_leaderboard, print_leaderboard_format, " .
 		  			  "print_turns_taken, print_turns_taken_format, " .
+		  			  "print_game_over, print_game_over_format, " .
 					  "print_last_players, print_last_players_n, print_last_players_format, " .
 					  "print_warning, print_warning_n, print_warning_format, " .
 		  			  "webhook_name, webhook_url, webhook_image, webhook_channel";
 			$result = dbQuery(
-				"INSERT INTO notification_settings($fields) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+				"INSERT INTO notification_settings($fields) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 				array(
 					$form['game_id'], $_SESSION['player_id'], $_SESSION['id'], trim($form['print_turn_start_format']),
 					isset($form['print_leaderboard']) && $form['print_leaderboard'] == 'on', trim($form['print_leaderboard_format']),
 					isset($form['print_turns_taken']) && $form['print_turns_taken'] == 'on', trim($form['print_turns_taken_format']),
+					isset($form['print_game_over']) && $form['print_game_over'] == 'on', trim($form['print_game_over_format']),
 					isset($form['print_last_players']) && $form['print_last_players'] == 'on', $form['print_last_players_n'], trim($form['print_last_players_format']),
 					isset($form['print_warning']) && $form['print_warning'] == 'on', $form['print_warning_n'], trim($form['print_warning_format']),
 					trim($form['webhook_name']), trim($form['webhook_url']), trim($form['webhook_image']), trim($form['webhook_channel'])
@@ -141,6 +144,7 @@ class Game
 			$fields = "print_turn_start_format = ?, " .
 					  "print_leaderboard = ?, print_leaderboard_format = ?, " .
 		  			  "print_turns_taken = ?, print_turns_taken_format = ?, " .
+		  			  "print_game_over = ?, print_game_over_format = ?, " .
 					  "print_last_players = ?, print_last_players_n = ?, print_last_players_format = ?, " .
 					  "print_warning = ?, print_warning_n = ?, print_warning_format = ?, " .
 		  			  "webhook_name = ?, webhook_url = ?, webhook_image = ?, webhook_channel = ?";
@@ -150,6 +154,7 @@ class Game
 					trim($form['print_turn_start_format']),
 					isset($form['print_leaderboard']) && $form['print_leaderboard'] == 'on', trim($form['print_leaderboard_format']),
 					isset($form['print_turns_taken']) && $form['print_turns_taken'] == 'on', trim($form['print_turns_taken_format']),
+					isset($form['print_game_over']) && $form['print_game_over'] == 'on', trim($form['print_game_over_format']),
 					isset($form['print_last_players']) && $form['print_last_players'] == 'on', isset($form['print_last_players_n']) ? $form['print_last_players_n'] : 1, trim($form['print_last_players_format']),
 					isset($form['print_warning']) && $form['print_warning'] == 'on', isset($form['print_warning_n']) ? $form['print_warning_n'] : 2, trim($form['print_warning_format']),
 					trim($form['webhook_name']), trim($form['webhook_url']), trim($form['webhook_image']), trim($form['webhook_channel']),
@@ -298,7 +303,6 @@ class Game
 					if (count($last_turn) > 0)
 					{
 						$player['rank_last'] = $last_turn[0]['rank'];
-						error_log($last_turn[0]['rank']);
 					}
 				}
 
@@ -341,7 +345,7 @@ class Game
 		self::renameArrayKey($universe, 'fleets', 'carriers');
 
 		// if this is a dark galaxy, hide carriers and stars
-		if ($game_settings['dark_galaxy'])
+		if ($game_settings['dark_galaxy'] == 1)
 		{
 			unset($universe['carriers']);
 			unset($universe['stars']);
@@ -356,6 +360,7 @@ class Game
 				self::renameArrayKey($carrier, 'puid', 'player_id');
 				self::renameArrayKey($carrier, 'st', 'ship_count');
 				self::renameArrayKey($carrier, 'o', 'waypoints');
+				self::renameArrayKey($carrier, 'l', 'loop');
 
 				foreach ($carrier['waypoints'] as &$waypoint)
 				{
@@ -433,7 +438,7 @@ class Game
 			$universe['turn_end'] = intval($universe['turn_end'] / 1000);
 			$universe['turn_start'] = intval($universe['turn_end'] - ($game_settings['turn_time'] * 60 * 60));
 		}
-		
+
 		ksort($universe);
 		return $universe;
 	}

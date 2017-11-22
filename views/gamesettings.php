@@ -49,7 +49,7 @@
 		<input name='print_last_players_n' type='number' value="2" min="1" max="32">
 	</div>
 	<div id='print-last-players-field' class="field">
-		<input name='print_last_players_format' type='text' value="There are *%COUNT%* players left to taken their turn.\n%PLAYERS%" maxlength="512">
+		<input name='print_last_players_format' type='text' value="There are *%COUNT%* players left to take their turn.\n%PLAYERS%" maxlength="512">
 	</div>
 	<div class="field">
 		<span>Turn End Warning (hrs)</span>
@@ -58,6 +58,13 @@
 	</div>
 	<div id='print-warning-field' class="field">
 		<input name='print_warning_format' type='text' value="There are only *%HOURS%* hours left to take your turn!" maxlength="512">
+	</div>
+	<div class="field">
+		<span>Game Over</span>
+		<input name='print_game_over' type='checkbox' checked="checked">
+	</div>
+	<div id='print-game-over-field' class="field">
+		<input name='print_game_over_format' type='text' value="%NAME% just ended, and *%WINNER%* is the winner! Here is the leaderboard:" maxlength="512">
 	</div>
 	<a class="btn btn-block btn-center" href="dist/emoji.zip">Download Emojis</a>
 	<div class="category">
