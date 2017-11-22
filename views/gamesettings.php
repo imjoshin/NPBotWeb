@@ -4,7 +4,7 @@
 <form id="settings">
 	<h1 id="settings-name">Spacegame</h1>
 	<div class="category">
-		<span>Webhook Info</span>
+		<span>Bot Info</span>
 	</div>
 	<div class="field">
 		<span class='block'>Webhook URL</span>
@@ -15,11 +15,11 @@
 		<input id='webhook-channel' name='webhook_channel' type='text' maxlength="32">
 	</div>
 	<div class="field">
-		<span class='block'>Webhook Name</span>
+		<span class='block'>Bot Name</span>
 		<input name='webhook_name' type='text' maxlength="32" value="NeptuneBot">
 	</div>
 	<div class="field">
-		<span class='block'>Webhook Image</span>
+		<span class='block'>Bot Avatar</span>
 		<input name='webhook_image' type='text' maxlength="512" value="http://joshjohnson.io/images/np.png">
 	</div>
 	<div class="category">
