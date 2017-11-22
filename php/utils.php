@@ -77,8 +77,13 @@ function dbConnect()
  * @param array  $params An array of parameters to bind
  * @return array Matching rows in an array
  */
-function dbQuery($query, $params = null)
+function dbQuery($query, $params = null, $print = false)
 {
+	if ($print)
+	{
+		error_log(dbQueryToString($query, $params));
+	}
+
 	$mysqli = dbConnect();
 	$stmt = $mysqli->prepare($query);
 
@@ -126,6 +131,25 @@ function dbQuery($query, $params = null)
 
 	$stmt->close();
 	return $result;
+}
+
+function dbQueryToString($query, $params)
+{
+	if (!is_array($params) || count($params) == 0)
+	{
+		return $query;
+	}
+
+	$str = preg_replace_callback(
+		'/\?/',
+		function($match) use(&$params)
+		{
+		    return "'" . array_shift($params) . "'";
+		},
+		$query
+	);
+
+	return $str;
 }
 
 ?>
