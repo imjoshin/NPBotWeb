@@ -28,11 +28,22 @@ class Game
 		}
 
 		// get list of games
-		$games = (isset($player['open_games']) ? $player['open_games'] : array());
-		$ret = array();
-		foreach ($games as $game)
+		$open_games = (isset($player['open_games']) ? $player['open_games'] : array());
+		$complete_games = (isset($player['complete_games']) ? $player['complete_games'] : array());
+
+		$ret = array(
+			"open_games" => array(),
+			"complete_games" => array(),
+		);
+
+		foreach ($open_games as $game)
 		{
-			$ret[] = self::getGame($game['number'], $game, true);
+			$ret["open_games"][] = self::getGame($game['number'], $game, true);
+		}
+
+		foreach ($complete_games as $game)
+		{
+			$ret["complete_games"][] = self::getGame($game['number'], $game, true);
 		}
 
 		return $ret;
@@ -224,8 +235,9 @@ class Game
 		}
 
 		// get list of games to find game settings
-		$games = (isset($player['open_games']) ? $player['open_games'] : array());
-		foreach ($games as $g)
+		$open_games = (isset($player['open_games']) ? $player['open_games'] : array());
+		$complete_games = (isset($player['complete_games']) ? $player['complete_games'] : array());
+		foreach (array_merge($open_games, $complete_games) as $g)
 		{
 			if ($g['number'] == $game_id)
 			{

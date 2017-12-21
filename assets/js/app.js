@@ -16,7 +16,7 @@ $().ready(function() {
 		} else if ($(this).attr('data-type') == "slack") {
 			if ($(this).val().indexOf('discordapp.com/api/webhooks') >= 0) {
 				$(this).attr('data-type', 'discord');
-				
+
 				if ($('#gamesettings').is(":visible")) {
 					$('#slack-channel').slideUp(150);
 				} else {
@@ -102,6 +102,7 @@ $().ready(function() {
 	$(document).on('click', '#settings div.btn:not(.disabled)', function() {
 		var btn = $(this);
 		btn.addClass('disabled');
+		$('#settings input[type="number"]').prop('disabled', false);
 
 		$.ajax({
 			type: "POST",
@@ -110,7 +111,7 @@ $().ready(function() {
 			data: {
 				call: 'save_settings',
 				form: $('#settings').serialize()
-			},
+			}, 
 			success: function(data) {
 				if (data.success) {
 					$.each($('.btn-game'), function(k, v) {
