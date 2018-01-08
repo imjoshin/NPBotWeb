@@ -34,4 +34,12 @@ if (!empty($game_list['complete_games']))
 		<?php
 	}
 }
+
+if (empty($game_list['open_games']) && empty($game_list['complete_games']))
+{
+	?>
+	<h1>Active Games</h1>
+	You are not in any active games.
+	<?php
+}
 ?>

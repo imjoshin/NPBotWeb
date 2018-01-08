@@ -370,6 +370,12 @@ class Game
 		}
 		else
 		{
+			// hide carriers if game is still running
+			if (!$universe['game_over'])
+			{
+				unset($universe['carriers']);
+			}
+
 			// reformat carriers and stars
 			foreach ($universe['carriers'] as &$carrier)
 			{
@@ -433,6 +439,16 @@ class Game
 				self::renameArrayKey($star, 'nr', 'natural_resources');
 				self::renameArrayKey($star, 'r', 'radius');
 				self::renameArrayKey($star, 'ga', 'has_gate');
+
+				// hide certain data if game is still running
+				if (!$universe['game_over'])
+				{
+					unset($star['ship_count']);
+					unset($star['economy']);
+					unset($star['industry']);
+					unset($star['science']);
+					unset($star['has_gate']);
+				}
 			}
 		}
 
