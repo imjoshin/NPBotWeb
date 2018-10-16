@@ -257,7 +257,14 @@ class Game
 			case 'settings':
 				return $game_settings;
 			default:
-				return self::getTurn($client, $universe, $turn, $game_settings);
+				if (is_numeric($var))
+				{
+					return self::getTurn($client, $universe, $var, $game_settings);
+				}
+				else
+				{
+					return ['error' => 'Unknown parameter.'];
+				}
 		}
 
 	}
@@ -374,56 +381,56 @@ class Game
 			if (!$universe['game_over'])
 			{
 				unset($universe['carriers']);
-			}
-
-			// reformat carriers and stars
-			foreach ($universe['carriers'] as &$carrier)
-			{
-				self::renameArrayKey($carrier, 'uid', 'id');
-				self::renameArrayKey($carrier, 'n', 'name');
-				self::renameArrayKey($carrier, 'puid', 'player_id');
-				self::renameArrayKey($carrier, 'st', 'ship_count');
-				self::renameArrayKey($carrier, 'o', 'waypoints');
-				self::renameArrayKey($carrier, 'l', 'loop');
-
-				foreach ($carrier['waypoints'] as &$waypoint)
+			} else {
+				// reformat carriers and stars
+				foreach ($universe['carriers'] as &$carrier)
 				{
-					$newWaypoint['star_id'] = $waypoint[1];
-					$newWaypoint['ship_count'] = $waypoint[3];
+					self::renameArrayKey($carrier, 'uid', 'id');
+					self::renameArrayKey($carrier, 'n', 'name');
+					self::renameArrayKey($carrier, 'puid', 'player_id');
+					self::renameArrayKey($carrier, 'st', 'ship_count');
+					self::renameArrayKey($carrier, 'o', 'waypoints');
+					self::renameArrayKey($carrier, 'l', 'loop');
 
-					// find action name
-					switch ($waypoint[2])
+					foreach ($carrier['waypoints'] as &$waypoint)
 					{
-						case 0:
-							$newWaypoint['action'] = 'do_nothing';
-							unset($newWaypoint['ship_count']);
-							break;
-						case 1:
-							$newWaypoint['action'] = 'collect_all';
-							unset($newWaypoint['ship_count']);
-							break;
-						case 2:
-							$newWaypoint['action'] = 'drop_all';
-							unset($newWaypoint['ship_count']);
-							break;
-						case 3:
-							$newWaypoint['action'] = 'collect';
-							break;
-						case 4:
-							$newWaypoint['action'] = 'drop';
-							break;
-						case 5:
-							$newWaypoint['action'] = 'collect_all_but';
-							break;
-						case 6:
-							$newWaypoint['action'] = 'garrison_star';
-							break;
-						default:
-							$newWaypoint['action'] = 'do_nothing';
-							break;
-					}
+						$newWaypoint['star_id'] = $waypoint[1];
+						$newWaypoint['ship_count'] = $waypoint[3];
 
-					$waypoint = $newWaypoint;
+						// find action name
+						switch ($waypoint[2])
+						{
+							case 0:
+								$newWaypoint['action'] = 'do_nothing';
+								unset($newWaypoint['ship_count']);
+								break;
+							case 1:
+								$newWaypoint['action'] = 'collect_all';
+								unset($newWaypoint['ship_count']);
+								break;
+							case 2:
+								$newWaypoint['action'] = 'drop_all';
+								unset($newWaypoint['ship_count']);
+								break;
+							case 3:
+								$newWaypoint['action'] = 'collect';
+								break;
+							case 4:
+								$newWaypoint['action'] = 'drop';
+								break;
+							case 5:
+								$newWaypoint['action'] = 'collect_all_but';
+								break;
+							case 6:
+								$newWaypoint['action'] = 'garrison_star';
+								break;
+							default:
+								$newWaypoint['action'] = 'do_nothing';
+								break;
+						}
+
+						$waypoint = $newWaypoint;
+					}
 				}
 			}
 
@@ -479,12 +486,94 @@ class Game
 
 	public static function getAllTurns($client, $universe, $game_settings)
 	{
-		return array("message" => "Getting all turns.");
+		$current_turn = self::getLatestTurn($client, $universe, $game_settings);
+		$turns = [];
+
+		for ($i = 1; $i < $current_turn['turn_num']; $i++)
+		{
+			$turn = self::getTurn($client, $universe, $i, $game_settings, false);
+			if (!array_key_exists('error', $turn))
+			{
+				$turns[] = $turn;
+			}
+		}
+
+		return ['settings' => $game_settings, 'turns' => $turns];
 	}
 
-	public static function getTurn($client, $universe, $turn, $game_settings)
+	public static function getTurn($client, $universe, $turn, $game_settings, $turn_only = true)
 	{
-		return array("message" => "Getting turn $turn.");
+		$turns = dbQuery("SELECT * FROM game_turn WHERE game_id = ? AND id = ?", array($game_settings['id'], $turn));
+		if (!count($turns))
+		{
+			return ['error' => 'Invalid turn.'];
+		}
+
+		$turn_data = $turns[0];
+
+		$players = dbQuery("
+			SELECT player.name, player.color, player.avatar, player.shape, player_turn.* FROM np.player_turn
+			JOIN np.player ON player.id = player_turn.player_id and player.game_id = player_turn.game_id
+			WHERE player_turn.game_id = ? AND player_turn.turn_id = ?
+			",
+			array($game_settings['id'], $turn)
+		);
+
+		if (!count($players))
+		{
+			return ['error' => 'Failed to get players.'];
+		}
+
+		foreach ($players as &$player)
+		{
+			$player['tech'] = json_decode($player['tech']);
+			$player['taken_at'] = strtotime($player['taken_at']);
+			unset($player['turn_id']);
+			unset($player['game_id']);
+			self::renameArrayKey($player, 'player_id', 'id');
+			ksort($player);
+		}
+
+		$turn_data['players'] = $players;
+		$turn_data['turn_end'] = strtotime($turn_data['turn_end']);
+		$turn_data['turn_start'] = strtotime($turn_data['turn_start']);
+
+		if (array_key_exists('stars', $turn_data))
+		{
+			$turn_data['stars'] = json_decode($turn_data['stars']);
+		}
+
+		if (array_key_exists('carriers', $turn_data))
+		{
+			$turn_data['carriers'] = json_decode($turn_data['carriers']);
+		}
+
+		self::renameArrayKey($turn_data, 'id', 'turn_num');
+
+		if ($turn_only)
+		{
+			$game_data = dbQuery("SELECT id, name, description, start_time, game_over, settings from game where id = ?;", array($game_settings['id']));
+
+			if (!count($game_data))
+			{
+				return ['error' => 'Failed to get game data.'];
+			}
+
+			$game_data = $game_data[0];
+
+			$game_data['start_time'] = strtotime($game_data['start_time']);
+			unset($game_data['settings']);
+			$turn_data = array_merge($turn_data, $game_data);
+		}
+		else
+		{
+			unset($turn_data['game_id']);
+		}
+
+		unset($turn_data['notified']);
+		unset($turn_data['notified_players']);
+		ksort($turn_data);
+		return $turn_data;
 	}
 
 	public static function getSettings($client, $universe, $game_settings)
