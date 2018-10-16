@@ -20,14 +20,14 @@
 	</div>
 	<div class="field">
 		<span class='block'>Bot Avatar</span>
-		<input name='webhook_image' type='text' maxlength="512" value="http://joshjohnson.io/images/np.png">
+		<input name='webhook_image' type='text' maxlength="512" value="https://jjdev.io/npbot/dist/img/icon.png">
 	</div>
 	<div class="category">
 		<span>Notifications</span>
 	</div>
 	<div class="field">
 		<span class='block'>Turn Start</span>
-		<input name='print_turn_start_format' type='text' value="Turn *%TURN%* just started! It ends %TURNEND%.\nHere is the leaderboard:" maxlength="512">
+		<input name='print_turn_start_format' type='text' value="%NAMELINK%\nTurn *%TURN%* just started! It ends %TURNEND%.\nHere is the leaderboard:" maxlength="512">
 	</div>
 	<div class="field">
 		<span>Turn Leaderboard</span>

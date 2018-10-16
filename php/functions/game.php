@@ -473,6 +473,7 @@ class Game
 		unset($universe['start_time']);
 		self::renameArrayKey($universe, 'fleet_speed', 'carrier_speed');
 		self::renameArrayKey($universe, 'turn_based_time_out', 'turn_end');
+		$universe['game_id'] = $game_settings['id'];
 
 		if ($universe['started'])
 		{
