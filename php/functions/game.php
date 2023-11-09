@@ -88,7 +88,7 @@ class Game
 			));
 		}
 
-		if (!isset($form['webhook_url']) || strpos($form['webhook_url'], 'hooks.slack.com/services') === false && strpos($form['webhook_url'], 'discordapp.com/api/webhooks') === false)
+		if (!isset($form['webhook_url']) || strpos($form['webhook_url'], 'hooks.slack.com/services') === false && strpos($form['webhook_url'], 'discord.com/api/webhooks') === false)
 		{
 			return array('success'=>false, 'output'=>array(
 				"message"=>"Invalid webhook URL."

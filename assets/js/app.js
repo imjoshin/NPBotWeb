@@ -1,8 +1,8 @@
-$(document).foundation()
+$(document).foundation();
 
-$().ready(function() {
+$().ready(function () {
 	// show channel field if slack webhook
-	$("#webhook-url").on('keyup', function() {
+	$("#webhook-url").on('keyup', function () {
 		if ($(this).attr('data-type') == "discord") {
 			if ($(this).val().indexOf('hooks.slack.com/services') >= 0) {
 				$(this).attr('data-type', 'slack');
@@ -14,7 +14,7 @@ $().ready(function() {
 				}
 			}
 		} else if ($(this).attr('data-type') == "slack") {
-			if ($(this).val().indexOf('discordapp.com/api/webhooks') >= 0) {
+			if ($(this).val().indexOf('discord.com/api/webhooks') >= 0) {
 				$(this).attr('data-type', 'discord');
 
 				if ($('#gamesettings').is(":visible")) {
@@ -26,7 +26,7 @@ $().ready(function() {
 		}
 	});
 
-	$('#settings input[type="checkbox"]').on('change', function() {
+	$('#settings input[type="checkbox"]').on('change', function () {
 		var field = $("#" + $(this).attr('name').replace(/\_/g, '-') + '-field');
 
 		if ($(this).is(':checked')) {
@@ -48,7 +48,7 @@ $().ready(function() {
 		}
 	});
 
-	$('.btn-home').on('click', function() {
+	$('.btn-home').on('click', function () {
 		$('.view').hide();
 		$('#home').show();
 
@@ -60,7 +60,7 @@ $().ready(function() {
 		$('#player-table tr:not(.template)').remove();
 	});
 
-	$('.btn-game').on('click', function() {
+	$('.btn-game').on('click', function () {
 		if ($(this).attr('data-fields') == null) {
 			alert("You are not the admin of this game.\nPlease contact the admin to set up notifications.");
 			return;
@@ -71,7 +71,7 @@ $().ready(function() {
 
 		// Set fields on form
 		var fields = $.parseJSON($(this).attr('data-fields'));
-		$.each(fields, function(input, value) {
+		$.each(fields, function (input, value) {
 			input = input.replace('[', '\\[').replace(']', '\\]');
 			if ($('[name = ' + input + ']').attr("type") == "checkbox") {
 				$('[name = ' + input + ']').prop('checked', value == 1);
@@ -82,7 +82,7 @@ $().ready(function() {
 
 		if ('players' in fields) {
 			$('#no-players-yet').hide();
-			$.each(fields['players'], function(key, player) {
+			$.each(fields['players'], function (key, player) {
 				var row = $('#player-table .template').clone();
 				row.removeClass('template');
 				row.find('td:first-child').text(player['name']);
@@ -99,7 +99,7 @@ $().ready(function() {
 		$('#gamesettings').show();
 	});
 
-	$(document).on('click', '#settings div.btn:not(.disabled)', function() {
+	$(document).on('click', '#settings div.btn:not(.disabled)', function () {
 		var btn = $(this);
 		btn.addClass('disabled');
 		$('#settings input[type="number"]').prop('disabled', false);
@@ -111,10 +111,10 @@ $().ready(function() {
 			data: {
 				call: 'save_settings',
 				form: $('#settings').serialize()
-			}, 
-			success: function(data) {
+			},
+			success: function (data) {
 				if (data.success) {
-					$.each($('.btn-game'), function(k, v) {
+					$.each($('.btn-game'), function (k, v) {
 						// find game button
 						if ($(this).attr('data-fields') && $(this).attr('data-fields').indexOf(data.output['game_id']) >= 0) {
 							$(this).attr('data-fields', JSON.stringify(data.output));
@@ -126,9 +126,9 @@ $().ready(function() {
 					alert(data.output['message']);
 				}
 			},
-			complete: function() {
+			complete: function () {
 				btn.removeClass('disabled');
 			}
 		});
-	})
+	});
 });
